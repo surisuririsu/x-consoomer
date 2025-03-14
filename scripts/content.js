@@ -60,6 +60,10 @@ const observer = new MutationObserver((mutations) => {
       }
     }
   }
+
+  if (Object.keys(window.xConsoomerPosts).length > 100) {
+    downloadPosts();
+  }
 });
 
 observer.observe(document, { childList: true, subtree: true });
