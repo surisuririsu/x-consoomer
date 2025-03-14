@@ -1,7 +1,7 @@
 MutationObserver = window.MutationObserver;
 
 window.xConsoomerPosts = {};
-window.currentStatus = null;
+window.xConsoomerCurrentStatus = null;
 
 const getPost = (article) => {
   try {
@@ -12,6 +12,17 @@ const getPost = (article) => {
     const content = article.querySelector(
       '[data-testid="tweetText"]'
     ).innerText;
+    const photoElems = article.querySelectorAll('[data-testid="tweetPhoto"]');
+    let photos = [];
+    for (let photoElem of photoElems) {
+      const photoImg = photoElem.querySelector("img");
+      if (photoImg) {
+        photos.push({
+          src: photoImg.src,
+          alt: photoImg.alt,
+        });
+      }
+    }
     const stats = article.querySelector('[role="group"]').ariaLabel;
 
     const post = {
@@ -19,12 +30,18 @@ const getPost = (article) => {
       ts: timestamp,
       txt: content,
       stats,
-      og: window.currentStatus,
     };
+
+    if (photos.length > 0) {
+      post.imgs = photos;
+    }
+    if (window.xConsoomerCurrentStatus) {
+      post.og = window.xConsoomerCurrentStatus;
+    }
 
     return post;
   } catch (e) {
-    console.error(e);
+    console.log(e);
     return null;
   }
 };
@@ -34,7 +51,7 @@ const observer = new MutationObserver((mutations) => {
   const url = window.location.href;
   const isStatus = url.includes("/status/");
   if (!isStatus) {
-    window.currentStatus = null;
+    window.xConsoomerCurrentStatus = null;
   }
 
   const viewTimestamp = new Date().toISOString();
@@ -55,7 +72,7 @@ const observer = new MutationObserver((mutations) => {
           article.tabIndex == -1 &&
           !article.innerText.endsWith("Show")
         ) {
-          window.currentStatus = key;
+          window.xConsoomerCurrentStatus = key;
         }
       }
     }
